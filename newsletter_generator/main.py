@@ -90,5 +90,5 @@ Be sure to cite sources for all news items by linking to the original source.
 
 
 if __name__ == "__main__":
-    # generate_news_data()
+    generate_news_data()
     generate_newsletter_markdown()

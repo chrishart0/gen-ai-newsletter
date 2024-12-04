@@ -19,17 +19,33 @@ class NewsItem(BaseModel):
     One source may have multiple news items, especially if it is a newsletter or aggregator site.
     """
 
-    title: str = Field(description="The title of the news item, give enough context so that the reader knows what the news item is about.")
-    importance: int = Field(description="The importance of the news item, on a scale of 1(low) to 5(high).")
-    category: Optional[str] = Field(description="The category of the news, such as 'AI', 'Foundational Models', 'agents', 'public news', 'policy', 'open source', 'LLMs', etc.")
-    source: Optional[str] = Field(description="The source publication or website of the news item.")
-    publish_date: Optional[datetime] = Field(description="The date the news item was published.")
+    title: str = Field(
+        description="The title of the news item, give enough context so that the reader knows what the news item is about."
+    )
+    importance: int = Field(
+        description="The importance of the news item, on a scale of 1(low) to 5(high)."
+    )
+    category: Optional[str] = Field(
+        description="The category of the news, such as 'AI', 'Foundational Models', 'agents', 'public news', 'policy', 'open source', 'LLMs', etc."
+    )
+    # source: Optional[str] = Field(description="The source publication or website of the news item.")
+    publish_date: Optional[datetime] = Field(
+        description="The date the news item was published."
+    )
     author: Optional[str] = Field(description="The author of the news item.")
-    summary: Optional[str] = Field(description="A summary of the news item, containing all relevant details.")
-    full_text: Optional[str] = Field(description="The full text of the news item, including all relevant details.")
-    image_links: Optional[List[str]] = Field(description="Links to images related to the news item.")
-    source_link: Optional[str] = Field(description="Link to the news source which this item was extracted from.")
-    # citations_links: Optional[List] = Field(description="Links to citations within the news item, if provided.")
+    summary: Optional[str] = Field(
+        description="A summary of the news item, containing all relevant details."
+    )
+    full_text: Optional[str] = Field(
+        description="The full text of the news item, including all relevant details."
+    )
+    image_links: Optional[List[str]] = Field(
+        description="Links to images related to the news item."
+    )
+    source_link: Optional[str] = Field(
+        description="Link to the news source which this item was extracted from."
+    )
+    # citations_links: Optional[List[dict]] = Field(description="Links to citations within the news item, if provided.")
 
 
 class NewsItemsList(BaseModel):
@@ -67,7 +83,7 @@ prompt = ChatPromptTemplate.from_messages(
             "author: 'John Doe', "
             "summary: 'OpenAI has released a new AI model...', "
             "link: null, "
-            "image links: null."
+            "image links: null.",
         ),
         ("human", "{text}"),
     ]
@@ -92,8 +108,12 @@ def extract_news_items(
 
         # Convert date string to datetime object
         if news_item.publish_date and isinstance(news_item.publish_date, str):
-            if len(news_item.publish_date) == 7:  # If the publish_date string is in 'YYYY-MM' format
+            if (
+                len(news_item.publish_date) == 7
+            ):  # If the publish_date string is in 'YYYY-MM' format
                 news_item.publish_date += "-01"  # Add the day
-            news_item.publish_date = datetime.strptime(news_item.publish_date, "%Y-%m-%d")
+            news_item.publish_date = datetime.strptime(
+                news_item.publish_date, "%Y-%m-%d"
+            )
 
     return extracted_data

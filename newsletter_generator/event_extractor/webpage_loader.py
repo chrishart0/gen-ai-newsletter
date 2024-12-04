@@ -1,7 +1,8 @@
-from langchain_community.document_loaders import WebBaseLoader
+# from langchain_community.document_loaders import WebBaseLoader
 from cachetools import TTLCache, cached
 import pickle
 import os
+import trafilatura
 
 # Get the configured logger
 from newsletter_generator.helpers.logger_helper import get_logger
@@ -38,8 +39,13 @@ def load_webpage(url: str) -> str:
         logger.info(f"Loading webpage from {url} and caching it.")
 
     # Load the webpage and cache the document
-    loader = WebBaseLoader(url)
-    document = loader.load()
+    downloaded = trafilatura.fetch_url(url)
+    # loader = WebBaseLoader(url)
+    # document = loader.load()
+    document = trafilatura.extract(downloaded, with_metadata=True, include_links=True)
+
+    print("!!!!!! Document text here:")
+    print(document)
 
     # Cache the document
     cache[url] = document
