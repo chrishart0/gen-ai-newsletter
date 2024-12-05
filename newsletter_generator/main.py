@@ -34,7 +34,7 @@ def generate_news_data():
         )  # Add individual events to the list
 
     # Get the pydantic objects into a list of dicts we can store in a JSON file
-    serializable_events = [event.dict() for event in all_news_items]
+    serializable_events = [event.model_dump() for event in all_news_items]
 
     # Store events in a JSON file
     logger.info(

@@ -1,5 +1,6 @@
 from typing import Optional, List
-from datetime import datetime
+
+# from datetime import datetime
 from pydantic import BaseModel, Field
 from newsletter_generator.helpers.logger_helper import get_logger
 from langchain_core.prompts import ChatPromptTemplate
@@ -20,19 +21,18 @@ class NewsItem(BaseModel):
     """
 
     title: str = Field(
-        description="The title of the news item, give enough context so that the reader knows what the news item is about."
+        description="The title of the news item, give enough context so that the reader knows what the news item is about. Include meaningful numbers in the title, if possible."
     )
-    importance: int = Field(
-        description="The importance of the news item, on a scale of 1(low) to 5(high)."
-    )
+    # importance: int = Field(
+    #     description="The importance of the news item, on a scale of 1(low) to 5(high)."
+    # )
     category: Optional[str] = Field(
         description="The category of the news, such as 'AI', 'Foundational Models', 'agents', 'public news', 'policy', 'open source', 'LLMs', etc."
     )
     # source: Optional[str] = Field(description="The source publication or website of the news item.")
-    publish_date: Optional[datetime] = Field(
-        description="The date the news item was published."
-    )
-    author: Optional[str] = Field(description="The author of the news item.")
+    # publish_date: Optional[datetime] = Field(
+    #     description="The date the news item was published."
+    # )
     summary: Optional[str] = Field(
         description="A summary of the news item, containing all relevant details."
     )
@@ -42,9 +42,9 @@ class NewsItem(BaseModel):
     image_links: Optional[List[str]] = Field(
         description="Links to images related to the news item."
     )
-    source_link: Optional[str] = Field(
-        description="Link to the news source which this item was extracted from."
-    )
+    # source_link: Optional[str] = Field(
+    #     description="Link to the news source which this item was extracted from."
+    # )
     # citations_links: Optional[List[dict]] = Field(description="Links to citations within the news item, if provided.")
 
 
@@ -62,34 +62,24 @@ prompt = ChatPromptTemplate.from_messages(
             "system",
             "You are an expert extraction algorithm. "
             "Extract multiple news items from the text. "
-            "Each news item should include a title, source link, importance, category, source, publish date, author, summary, link, and image links. "
-            "If you do not know the value of an attribute asked to extract, "
-            "return null for the attribute's value.",
+            "If you do not know the value of an attribute asked to extract return null for the attribute's value.",
         ),
-        # Please see the how-to about improving performance with
-        # reference examples.
-        # MessagesPlaceholder('examples'),
-        ("human", "{text}"),
         (
             "system",
-            "Example: If the text is 'AI Daily: New AI model released by OpenAI (source: OpenAI, publish date: 2022-01-01, author: John Doe, summary: OpenAI has released a new AI model...)', "
+            "Example: If the text is 'AI Daily: Meta releases Llama 3.1...)', "
             "you should extract the following news item: "
-            "title: 'New AI model released by OpenAI', "
-            "source link: null, "
-            "importance: null, "
-            "category: null, "
-            "source: 'OpenAI', "
-            "publish date: '2022-01-01', "
-            "author: 'John Doe', "
-            "summary: 'OpenAI has released a new AI model...', "
-            "link: null, "
-            "image links: null.",
+            "title: 'First open weights model competitive with OpenAI! Llama 3.1 released by Meta, new 405b model evals even with closed models', "
+            "...",
         ),
         ("human", "{text}"),
     ]
 )
 
 runnable = prompt | llm.with_structured_output(schema=NewsItemsList)
+
+
+class NewsItemWithSource(NewsItem):
+    source_link: str
 
 
 def extract_news_items(
@@ -102,18 +92,13 @@ def extract_news_items(
     # Log in green text that the news items were extracted
     logger.info(f"\033[92mExtracted {len(extracted_data.news_items)} news items\033[0m")
 
-    # Add the original source URL to each news item
-    for news_item in extracted_data.news_items:
-        news_item.source_link = original_source_url
+    # Convert each NewsItem to a NewsItemWithSource
+    news_items_with_source = [
+        NewsItemWithSource(**news_item.dict(), source_link=original_source_url)
+        for news_item in extracted_data.news_items
+    ]
 
-        # Convert date string to datetime object
-        if news_item.publish_date and isinstance(news_item.publish_date, str):
-            if (
-                len(news_item.publish_date) == 7
-            ):  # If the publish_date string is in 'YYYY-MM' format
-                news_item.publish_date += "-01"  # Add the day
-            news_item.publish_date = datetime.strptime(
-                news_item.publish_date, "%Y-%m-%d"
-            )
+    # Replace the old list of news items with the new one
+    extracted_data.news_items = news_items_with_source
 
     return extracted_data
