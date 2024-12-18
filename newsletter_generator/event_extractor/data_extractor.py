@@ -45,7 +45,9 @@ class NewsItem(BaseModel):
     # source_link: Optional[str] = Field(
     #     description="Link to the news source which this item was extracted from."
     # )
-    # citations_links: Optional[List[dict]] = Field(description="Links to citations within the news item, if provided.")
+    citations_links: Optional[List] = Field(
+        description="Links to sources cited within the news item, if provided."
+    )
 
 
 class NewsItemsList(BaseModel):

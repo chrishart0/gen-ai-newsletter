@@ -15,11 +15,23 @@ logger = get_logger()
 # List of URLs to process
 # TODO: make some method of finding the right newsletter issues every week, for now we update by hand
 gen_ai_newsletter_urls = [
-    "https://www.deeplearning.ai/the-batch/issue-277/",
-    "https://www.deeplearning.ai/the-batch/issue-276/",
+    "https://www.deeplearning.ai/the-batch/issue-280/",
+    "https://www.deeplearning.ai/the-batch/issue-279/",
     # "https://www.reddit.com/r/LocalLLaMA/"
     # Add more URLs as needed
 ]
+
+
+def concatenate_news_items() -> str:
+    all_news_items = "<NewsList>\n"
+
+    for url in gen_ai_newsletter_urls:
+        all_news_items += f"<NewsItem url='{url}'>\n"
+        all_news_items += load_webpage(url) + "\n"
+        all_news_items += "</NewsItem>\n"
+
+    all_news_items += "</NewsList>\n"
+    return all_news_items
 
 
 def generate_news_data():
@@ -52,7 +64,7 @@ def generate_news_data():
             logger.info(f"{field_name.capitalize()}: {field_value}")
 
 
-def generate_newsletter_markdown():
+def generate_newsletter_markdown(news_items_text: str):
     logger.info("Generating newsletter markdown")
 
     # Load events from the JSON file
@@ -90,5 +102,6 @@ Be sure to cite sources for all news items by linking to the original source.
 
 
 if __name__ == "__main__":
-    generate_news_data()
-    generate_newsletter_markdown()
+    # generate_news_data()
+    print(concatenate_news_items())
+    # generate_newsletter_markdown()
