@@ -68,11 +68,11 @@ def generate_newsletter_markdown(news_items_text: str):
     logger.info("Generating newsletter markdown")
 
     # Load events from the JSON file
-    with open(f"{settings.OUTPUT_DIRECTORY}events.json", "r") as f:
-        events_data = json.load(f)
+    # with open(f"{settings.OUTPUT_DIRECTORY}events.json", "r") as f:
+    #     events_data = json.load(f)
 
     # Sort events by date, handling None values by using a default date far in the past
-    events_data.sort(key=lambda x: x.get("date") or "0000-01-01")
+    # events_data.sort(key=lambda x: x.get("date") or "0000-01-01")
 
     # Assign the formatted string to the message
     messages = [
@@ -87,10 +87,12 @@ Keep the newsletter exciting and engaging, but don't make up any news items.
 Group the news items into sections with a short introductory paragraph for each section.
 When discussing models, cite evals/benchmarks/etc., compare to other popular models as much as possible so people can easily understand the relative performance of the models.
 Create a short executive summary at the top, maximum 4 sentences. In the executive summary, create an open loop, exciting readers, and giving a short hint at the most important topics. Someone should be able to read the executive summary get the most important headlines.
-Be sure to cite sources for all news items by linking to the original source.
+Be sure to cite all sources as thoroughly as possible.
+Include the markdown links from the news items as much as possible.
+Retain every single link from the source material.
 """,
         ),
-        ("human", json.dumps(events_data)),
+        ("human", news_items_text),
     ]
 
     # Pass the message to the LLM
@@ -103,5 +105,6 @@ Be sure to cite sources for all news items by linking to the original source.
 
 if __name__ == "__main__":
     # generate_news_data()
-    print(concatenate_news_items())
-    # generate_newsletter_markdown()
+    news_items = concatenate_news_items()
+    print("NEWS ITEMS!!!! \n\n\n" + news_items)
+    generate_newsletter_markdown(news_items)

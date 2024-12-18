@@ -44,9 +44,6 @@ def load_webpage(url: str) -> str:
     # document = loader.load()
     document = trafilatura.extract(downloaded, with_metadata=True, include_links=True)
 
-    print("!!!!!! Document text here:")
-    print(document)
-
     # Cache the document
     cache[url] = document
 
